@@ -48,6 +48,9 @@ def test():
     h2.cmd("tc qdisc")
     
 
+    # Set congestion controll to use on h2
+    h2.cmd("sysctl -w net.ipv4.tcp_congestion_control=prague")
+    print(h2.cmd("sysctl net.ipv4.tcp_congestion_control"))
 
     print("*** adding delay on s1")
     for intf in s1.intfList():
@@ -99,5 +102,5 @@ def test():
     net.stop()
 
 if __name__ == "__main__":
-    setLogLevel("debug")
+    setLogLevel("info")
     test()
