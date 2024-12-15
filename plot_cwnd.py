@@ -38,6 +38,6 @@ with open(file) as f:
     
 plt.plot(times, cwnd)
 plt.xlabel("Time (s)")
-plt.ylabel("cwnd (KBytes)")
-plt.title("TCP Prague")
+plt.ylabel("cwnd ()")
+plt.title("TCP (Prague)")
 plt.savefig("cwnd_plot.png")
