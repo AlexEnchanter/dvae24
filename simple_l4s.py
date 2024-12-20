@@ -10,8 +10,8 @@ from mininet.util import dumpNetConnections
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
 
-data_rate = 100
-RTT = 40
+data_rate = 10
+RTT = 20
 BDP = int((RTT * 10**-3) * (data_rate * 10**6))
 BDP_B = int(BDP//8)
 
@@ -58,9 +58,9 @@ def test():
 
     
     # Set congestion controll to use on h1 and h2
-    h1.cmd("sysctl -w net.ipv4.tcp_congestion_control=prague")
+    h1.cmd("sysctl -w net.ipv4.tcp_congestion_control=reno")
     print("h1:", h1.cmd("sysctl net.ipv4.tcp_congestion_control"))
-    h2.cmd("sysctl -w net.ipv4.tcp_congestion_control=prague")
+    h2.cmd("sysctl -w net.ipv4.tcp_congestion_control=reno")
     print("h2:", h2.cmd("sysctl net.ipv4.tcp_congestion_control"))
 
     print("*** adding delay on s1")
@@ -76,7 +76,7 @@ def test():
     # for srcIntf in s2.intfList():
     for srcIntf, _ in s2.connectionsTo(h2):
         print(srcIntf)
-        s2.cmd(f"tc qdisc replace dev {srcIntf} root handle 1: tbf rate 100mbit burst 2048 limit {2*BDP_B}")
+        s2.cmd(f"tc qdisc replace dev {srcIntf} root handle 1: tbf rate {data_rate}mbit burst 10000 limit {2*BDP_B}")
         
         # s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfif limit {2*BDP_B}")
         s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2 target")
