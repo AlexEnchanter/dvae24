@@ -10,7 +10,7 @@ from mininet.util import dumpNetConnections
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
 
-data_rate = 10
+data_rate = 100
 RTT = 20
 BDP = int((RTT * 10**-3) * (data_rate * 10**6))
 BDP_B = int(BDP//8)
@@ -79,8 +79,8 @@ def test():
         print(srcIntf)
         s2.cmd(f"tc qdisc replace dev {srcIntf} root handle 1: tbf rate {data_rate}mbit burst 10000 limit {2*BDP_B}")
         
-        s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfifo limit {2*BDP_B}")
-        # s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2")
+        # s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfifo limit {2*BDP_B}")
+        s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2")
     s2.cmd("tc qdisc")
         
 
@@ -100,7 +100,6 @@ def test():
     h2.cmd("iperf -s -e > iperf_server.log &")
     time.sleep(1)
     h1.cmd(f"iperf -c {h2.IP()} -t 60 -i 0.05 -e > iperf_client.log")
-    # h1.cmd(f"iperf -Z cubic -c {h2.IP()} -t 60 -i 0.1 -e > iperf_client.log")
     
     h1.cmd("killall iperf")
     h1.cmd("killall tcpdump")
