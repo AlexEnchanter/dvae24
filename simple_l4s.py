@@ -14,6 +14,7 @@ data_rate = 10
 RTT = 20
 BDP = int((RTT * 10**-3) * (data_rate * 10**6))
 BDP_B = int(BDP//8)
+CC = "prague"
 
 def assert_tcp_Prague_Avalable(node):
     res = node.cmd("sysctl net.ipv4.tcp_available_congestion_control")
@@ -58,9 +59,9 @@ def test():
 
     
     # Set congestion controll to use on h1 and h2
-    h1.cmd("sysctl -w net.ipv4.tcp_congestion_control=reno")
+    h1.cmd(f"sysctl -w net.ipv4.tcp_congestion_control={CC}")
     print("h1:", h1.cmd("sysctl net.ipv4.tcp_congestion_control"))
-    h2.cmd("sysctl -w net.ipv4.tcp_congestion_control=reno")
+    h2.cmd(f"sysctl -w net.ipv4.tcp_congestion_control={CC}")
     print("h2:", h2.cmd("sysctl net.ipv4.tcp_congestion_control"))
 
     print("*** adding delay on s1")
@@ -78,8 +79,8 @@ def test():
         print(srcIntf)
         s2.cmd(f"tc qdisc replace dev {srcIntf} root handle 1: tbf rate {data_rate}mbit burst 10000 limit {2*BDP_B}")
         
-        # s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfif limit {2*BDP_B}")
-        s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2 target")
+        s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfifo limit {2*BDP_B}")
+        # s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2")
     s2.cmd("tc qdisc")
         
 
