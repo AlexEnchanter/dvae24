@@ -24,7 +24,7 @@ def assert_tcp_Prague_Avalable(node):
     return False
 
 def test():
-    print(f"RTT: {RTT}ms, data rate: {data_rate}Mbps, BDP: {BDP} bits, BDP: {BDP_B} Bytes")
+    print(f"RTT: {RTT}ms, data rate: {data_rate}Mbps, BDP: {BDP} bits, BDP: {BDP_B} Bytes, CC: {CC}")
     net = Mininet(waitConnected=True, link=TCLink, autoStaticArp=True)
 
     net.addController("c0")
@@ -37,7 +37,7 @@ def test():
     
     net.addLink(h1, s1)
     net.addLink(s1, s2)
-    net.addLink(s2, h2)
+    net.addLink(h2, s2)
 
     net.start()
 
@@ -49,7 +49,7 @@ def test():
     h1.cmd(f"ethtool -K h1-eth0 tso off gso off gro off lro off")
     # h1.cmd(f"tc qdisc replace dev h1-eth0 root handle 1: fq limit {3*BDP_B} flow_limit 10240")
     h1.cmd("tc qdisc replace dev h1-eth0 root handle 1: fq limit 20480 flow_limit 10240")
-    print(h1.cmd("tc qdisc"))
+    h1.cmd("tc qdisc")
     
     h2.cmd(f"ethtool -K h2-eth0 tso off gso off gro off lro off")
     # h2.cmd(f"tc qdisc replace dev h2-eth0 root handle 1: fq limit {3*BDP} flow_limit 10240")
@@ -57,6 +57,9 @@ def test():
     h2.cmd("tc qdisc")
     
 
+    # Make sure ecn fallback is of
+    h1.cmd("echo 0 > /sys/module/tcp_prague/parameters/prague_ecn_fallback")
+    
     
     # Set congestion controll to use on h1 and h2
     h1.cmd(f"sysctl -w net.ipv4.tcp_congestion_control={CC}")
@@ -69,20 +72,22 @@ def test():
         if "lo" in intf.name:
             continue
         print(f"interface {intf}")
-        s1.cmd(f"tc qdisc replace dev {intf} root netem delay {RTT//2}ms limit {3*BDP_B}")
+        s1.cmd(f"tc qdisc replace dev {intf} root netem delay {RTT//2}ms limit {4*BDP_B}")
     s1.cmd("tc qdisc")
     
+
+
     # Maybe does what I think it does, ASSERT dualpi2 later
     print("*** replacing qdisc on s2")
     # for srcIntf in s2.intfList():
+    #     s2.cmd(f"tc qdisc replace dev {srcIntf} root handle 1: tbf rate {data_rate}mbit burst 10000 limit {2*BDP_B}")
+    #     s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2")
+    
     for srcIntf, _ in s2.connectionsTo(h2):
-        print(srcIntf)
         s2.cmd(f"tc qdisc replace dev {srcIntf} root handle 1: tbf rate {data_rate}mbit burst 10000 limit {2*BDP_B}")
-        
-        # s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfifo limit {2*BDP_B}")
         s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2")
-    s2.cmd("tc qdisc")
         
+    s2.cmd("tc qdisc")        
 
     a = assert_tcp_Prague_Avalable(h1)
     if a == False:
@@ -90,22 +95,21 @@ def test():
         return
 
 
-    h1.cmd("tcpdump -w capture_h1_prague.pcap &")
-    h2.cmd("tcpdump -w capture_h2_prague.pcap &")
+    # h1.cmd("tcpdump -w capture_h1_prague.pcap &")
+    # h2.cmd("tcpdump -w capture_h2_prague.pcap &")
     
     time.sleep(1)
     
     # Send Prague h1 -> h2
     print("running iperf for 60s")
-    h2.cmd("iperf -s -e > iperf_server.log &")
+    h2.cmd("iperf -s -e &")
     time.sleep(1)
-    h1.cmd(f"iperf -c {h2.IP()} -t 60 -i 0.05 -e > iperf_client.log")
+    h1.cmd(f"iperf -c {h2.IP()} -t 60 -i 0.05 -e > iperf_client_{CC}.log")
     
     h1.cmd("killall iperf")
-    h1.cmd("killall tcpdump")
-    
     h2.cmd("killall iperf")
-    h2.cmd("killall tcpdump")
+    # h1.cmd("killall tcpdump")
+    # h2.cmd("killall tcpdump")
     
     net.stop()
 

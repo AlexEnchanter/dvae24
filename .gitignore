@@ -1,2 +1,5 @@
 *.pcap
 *.log
+Lukas/
+result/
+__pycache__/
