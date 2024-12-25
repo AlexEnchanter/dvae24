@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import glob
+import os
 
 
 file_name = "iperf_client*.log"
@@ -24,7 +25,7 @@ dictionary = {}
 
 # Format shoud be iperf_client_<CC>_<run>.log
 for file in files:
-    key = file.rpartition(".log")[0].split("_")[3]
+    key = os.path.basename(file).rpartition(".log")[0].split("_")[3]
     group = dictionary.get(key, [])
     group.append(file)
     dictionary[key] = group
@@ -38,7 +39,7 @@ for key in dictionary:
         cwnd = []
 
         print("file:", file)
-        cc = file.rpartition(".log")[0].split("_")[2]
+        cc = os.path.basename(file).rpartition(".log")[0].split("_")[2]
         with open(file) as f:
             lines = f.readlines()
      
@@ -67,7 +68,7 @@ for key in dictionary:
                 
         plt.plot(times, bandwidth, label=cc)
         plt.xlabel("Time (s)")
-        plt.ylabel("Bandwidth (Mbps)")
+        plt.ylabel("Bandwidth (mbps)")
         plt.title(f"TCP Bandwidth 2 flows run {key}")
         plt.legend()
         plt.savefig(f"{args.input_folder}/{key}.png")

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import glob
 
 # BTW iperf csv is useless
-file_name = "iperf_client*.log"
+file_name = "./result/simple/iperf_client*.log"
 
 
 # TODO: Maybe add plot title/name in the first line of data file (or other useful data)
