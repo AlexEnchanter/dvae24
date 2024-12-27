@@ -25,19 +25,19 @@ def assert_cc(node, CC, net):
 
 def assert_tcp_Prague():
     res = subprocess.run(["sysctl", "net.ipv4.tcp_available_congestion_control"], capture_output=True)
-    if "prague" in res:
+    if "prague" in res.stdout:
         return True
     print("Prague not avalable")
     return False
 
 def load_modules():
     res = subprocess.run(["modprobe", "sch_dualpi2"], capture_output=True)
-    if "FATAL" in res:
+    if "FATAL" in res.stdout:
         return False
     print(f"Dualpi2 not avalable: {res}")
     
     res = subprocess.run(["modprobe", "tcp_prague"], capture_output=True)
-    if "FATAL" in res:
+    if "FATAL" in res.stdout:
         return False
     print(f"Dualpi2 not avalable: {res}")
     return True
