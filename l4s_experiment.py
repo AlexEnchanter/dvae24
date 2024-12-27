@@ -33,13 +33,14 @@ def assert_tcp_Prague():
 def load_modules():
     res = subprocess.run(["modprobe", "sch_dualpi2"], capture_output=True, text=True)
     if "FATAL" in res.stdout:
+        print(f"Dualpi2 not avalable: {res.stdout}")
         return False
-    print(f"Dualpi2 not avalable: {res}")
+    return True
     
     res = subprocess.run(["modprobe", "tcp_prague"], capture_output=True, text=True)
     if "FATAL" in res.stdout:
+        print(f"Prague not avalable: {res.stdout}")
         return False
-    print(f"Dualpi2 not avalable: {res}")
     return True
 
 
