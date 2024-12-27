@@ -135,14 +135,21 @@ def test(data_rate=100, RTT=20, competing_CC="cubic", ecn=1, aqm="dualpi2", ecn_
     # TODO: assert 
     print("*** replacing qdisc on s2")
     for srcIntf, _ in s2.connectionsTo(s3):
+        # Might want to increase limit on tbf, as not to make that a bottleneck
         s2.cmd(f"tc qdisc replace dev {srcIntf} root handle 1: tbf rate {data_rate}mbit burst 10000 limit {2*BDP_B}")
         
         if aqm == "dualpi2":
             s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2")
+        elif aqm == "FIFO+ECN":
+            s2.cmd(f"tc qdisc add dev {srcIntf} parent 1 fq {limit} orphan_mask 0 ce_threshold 5ms") # 5ms is the default for CoDel (target)
         elif aqm == "FIFO":
-            s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfifo {2*BDP_B}")
+            s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfifo limit {2*BDP_B}")
         elif aqm == "CoDel":
-            s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: codel ecn {2*BDP_B}")
+            s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: codel ecn limit {2*BDP_B}")
+        else:
+            print(f"Could not find aqm {aqm}")
+            net.stop()
+            exit()
         
     s2.cmd("tc qdisc")        
 
@@ -155,7 +162,7 @@ def test(data_rate=100, RTT=20, competing_CC="cubic", ecn=1, aqm="dualpi2", ecn_
     
     time.sleep(1)
     
-    l4s_s.cmd(f"iperf -c {l4s_r.IP()} -t 60 -i 0.05 -e > {out_folder}/iperf_client_prague_{run}.log &")
+    l4s_s.cmd(f"iperf -c {l4s_r.IP()} -t 60 -i 0.1 -e > {out_folder}/iperf_client_prague_{run}.log &")
     classic_s.cmd(f"iperf -c {classic_r.IP()} -t 60 -i 0.1 -e > {out_folder}/iperf_client_{competing_CC}_{run}.log &")
     
     
