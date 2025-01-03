@@ -144,7 +144,7 @@ def test(data_rate=100, RTT=20, competing_CC="cubic", ecn=1, aqm="dualpi2", ecn_
         if aqm == "dualpi2":
             s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: dualpi2")
         elif aqm == "FIFO+ECN":
-            s2.cmd(f"tc qdisc add dev {srcIntf} parent 1 fq limit {2*BDP_B} flow_limit {2*BDP_B} orphan_mask 0 ce_threshold 5ms") # 5ms is the default for CoDel (target)
+            s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: fq limit {2*BDP_B} flow_limit {2*BDP_B} orphan_mask 0 ce_threshold 5ms") # 5ms is the default for CoDel (target)
         elif aqm == "FIFO":
             s2.cmd(f"tc qdisc add dev {srcIntf} parent 1: bfifo limit {2*BDP_B}")
         elif aqm == "CoDel":

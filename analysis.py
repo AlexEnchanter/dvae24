@@ -92,14 +92,14 @@ for dir in dirs:
                 bw_ax.plot(times, bw_rolling, label=cc)
                 bw_ax.set_xlabel("Time (s)")
                 bw_ax.set_ylabel("Bandwidth (Mbps)")
-                bw_ax.set_title(f"TCP Bandwidth rolling mean, 2 flows run {key}")
+                bw_ax.set_title(f"TCP Bandwidth rolling mean, 2 flows run {key} ({aqm}, {dir})")
                 bw_ax.legend()
                 bw_fig.savefig(f"result/{dir}/{aqm}/bw_run_{key}.png")
                 
                 cwnd_ax.plot(times, cwnd, label=cc)
                 cwnd_ax.set_xlabel("Time (s)")
                 cwnd_ax.set_ylabel("cwnd")
-                cwnd_ax.set_title(f"TCP cwnd 2 flows run {key}")
+                cwnd_ax.set_title(f"TCP cwnd 2 flows run {key}, ({aqm}, {dir})")
                 cwnd_ax.legend()
                 cwnd_fig.savefig(f"result/{dir}/{aqm}/cwnd_run_{key}.png")
                 
@@ -108,7 +108,7 @@ for dir in dirs:
 
 # Print heatmap:
 aqm_heatmap = ["FIFO", "FIFO+ECN", "CoDel+ECN", "DualPI2"]
-ecn_heatmap = ["ECN", "No ECN", "ECN Fallback"]
+ecn_heatmap = ["Cubic + ECN", "Cubic + No ECN", "ECN Fallback"]
 
 # dirs = ["ECN1", "noECN", "ECN_fallback"]
 # aqms = ["CoDel", "dualpi2", "fifo", "fifoWithEcn"]
@@ -140,6 +140,7 @@ fig, ax = plt.subplots()
 im, cbar = hm.heatmap(np.array(heatmap_array), ecn_heatmap, aqm_heatmap, ax=ax, cmap="coolwarm", cbarlabel="Throughput [Mbps]")
 texts = hm.annotate_heatmap(im, valfmt="{x:.1f}")
 
+ax.set_title("TCP Prague Throughput [Mbps] vs A Cubic flow" )
 fig.tight_layout()
 fig.savefig("result/heatmap.png")
 plt.close(fig)
