@@ -8,7 +8,7 @@ import glob
 import os
 
 dirs = ["ECN1", "noECN", "ECN_fallback"]
-aqms = ["CoDel", "dualpi2", "fifo", "fifoWithEcn"]
+aqms = ["CoDel", "dualpi2", "fifo"] # fifoWithEcn removed because it does not work
 
 file_name = "iperf_client*.log"
 
@@ -107,7 +107,7 @@ for dir in dirs:
             plt.close(cwnd_fig)
 
 # Print heatmap:
-aqm_heatmap = ["FIFO", "FIFO+ECN", "CoDel+ECN", "DualPI2"]
+aqm_heatmap = ["FIFO", "CoDel+ECN", "DualPI2"]
 ecn_heatmap = ["Cubic + ECN", "Cubic + No ECN", "ECN Fallback"]
 
 # dirs = ["ECN1", "noECN", "ECN_fallback"]
@@ -118,9 +118,9 @@ ecn_heatmap = ["Cubic + ECN", "Cubic + No ECN", "ECN Fallback"]
 # no ECN, 
 # ECN 
 # ECN Fallback
-heatmap_array = [[0 for i in range(4)] for i in range(3)]
+heatmap_array = [[0 for i in range(3)] for i in range(3)]
 
-name_to_index = {"noECN": 0, "ECN1": 1, "ECN_fallback": 2, "fifo": 0, "fifoWithEcn": 1, "CoDel": 2, "dualpi2": 3}
+name_to_index = {"noECN": 0, "ECN1": 1, "ECN_fallback": 2, "fifo": 0, "CoDel": 1, "dualpi2": 2}
 
 print(heatmap_dict)
 
