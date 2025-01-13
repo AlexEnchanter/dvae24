@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 
 import os
@@ -100,8 +99,6 @@ def test(data_rate=100, RTT=20, competing_CC="cubic", ecn=1, aqm="dualpi2", ecn_
     l4s_r.cmd(f"ethtool -K {l4s_r_eth0} tso off gso off gro off lro off")
     l4s_r.cmd(f"tc qdisc replace dev {l4s_r_eth0} root handle 1: fq limit 20480 flow_limit 10240")
     
-    
-    # Do I need to set ecn_fallback on receiver too?
     l4s_s.cmd(f"echo {ecn_fallback} > /sys/module/tcp_prague/parameters/prague_ecn_fallback")
     
     # Set prague on l4s sender and receiver 
@@ -113,8 +110,6 @@ def test(data_rate=100, RTT=20, competing_CC="cubic", ecn=1, aqm="dualpi2", ecn_
     classic_r.cmd(f"sysctl -w net.ipv4.tcp_congestion_control={competing_CC}")
     
     # Set classic ecn mode
-    # !!! Not sure if this works... Initial testing this seems to have no effect
-    # Could be I forgot to set flow_limit on fifo+ecn, so no packets got marked
     classic_s.cmd(f"sysctl -w net.ipv4.tcp_ecn={ecn}")
     classic_r.cmd(f"sysctl -w net.ipv4.tcp_ecn={ecn}")
     
